@@ -1,4 +1,4 @@
-{-# LANGUAGE CPP #-}
+{-# LANGUAGE CPP,NoMonomorphismRestriction #-}
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Diagrams.Backend.Gtk
@@ -52,15 +52,14 @@ toGtkCoords d = (\(_,_,d') -> d') $
 --   rescaling to fit the full area.
 defaultRender :: Monoid' m => DrawingArea -> QDiagram Cairo R2 m -> IO ()
 defaultRender drawingarea diagram = do
-  drawWindow <- (widgetGetDrawWindow drawingarea)
+  drawWindow <- widgetGetParentWindow drawingarea
   renderDoubleBuffered drawWindow opts diagram
-    where opts w h = (CairoOptions
+    where opts w h = CairoOptions
               { _cairoFileName     = ""
               , _cairoSizeSpec     = Dims (fromIntegral w) (fromIntegral h)
               , _cairoOutputType   = RenderOnly
               , _cairoBypassAdjust = False
               }
-           )
 
 -- | Render a diagram to a 'DrawableClass' with double buffering.  No
 --   rescaling or transformations will be performed.
@@ -68,34 +67,34 @@ defaultRender drawingarea diagram = do
 --   Typically the diagram will already have been transformed by
 --   'toGtkCoords'.
 renderToGtk ::
-  (DrawableClass dc, Monoid' m)
-  => dc                     -- ^ widget to render onto
+  (Monoid' m)
+  => DrawWindow                     -- ^ widget to render onto
   -> QDiagram Cairo R2 m  -- ^ Diagram
   -> IO ()
-renderToGtk drawable = do renderDoubleBuffered drawable opts
-  where opts _ _ = (CairoOptions
+renderToGtk drawable = renderDoubleBuffered drawable opts
+  where opts w h = CairoOptions
                     { _cairoFileName     = ""
-                    , _cairoSizeSpec     = Absolute
+                    , _cairoSizeSpec     = Dims (fromIntegral w) (fromIntegral h)
                     , _cairoOutputType   = RenderOnly
-                    , _cairoBypassAdjust = True
+                    , _cairoBypassAdjust = False
                     }
-                   )
 
 
 -- | Render a diagram onto a 'DrawableClass' using the given CairoOptions.
 --
 --   This uses cairo double-buffering.
 renderDoubleBuffered ::
-  (Monoid' m, DrawableClass dc) =>
-  dc -- ^ drawable to render onto
+  (Monoid' m) =>
+  DrawWindow -- ^ drawable to render onto
   -> (Int -> Int -> Options Cairo R2) -- ^ options, depending on drawable width and height
   -> QDiagram Cairo R2 m -- ^ Diagram
   -> IO ()
 renderDoubleBuffered drawable renderOpts diagram = do
-  (w,h) <- drawableGetSize drawable
+  w <- drawWindowGetWidth drawable
+  h <- drawWindowGetHeight drawable
   let opts = renderOpts w h
       renderAction = delete w h >> snd (renderDia Cairo opts diagram)
-  renderWithDrawable drawable (doubleBuffer renderAction)
+  renderWithDrawWindow drawable (doubleBuffer renderAction)
 
 
 -- | White rectangle of size (w,h).
