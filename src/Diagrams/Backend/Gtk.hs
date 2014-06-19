@@ -72,9 +72,9 @@ renderToGtk ::
   -> QDiagram Cairo R2 m  -- ^ Diagram
   -> IO ()
 renderToGtk drawable = renderDoubleBuffered drawable opts
-  where opts w h = CairoOptions
+  where opts _ _ = CairoOptions
                     { _cairoFileName     = ""
-                    , _cairoSizeSpec     = Dims (fromIntegral w) (fromIntegral h)
+                    , _cairoSizeSpec     = Absolute
                     , _cairoOutputType   = RenderOnly
                     , _cairoBypassAdjust = False
                     }
