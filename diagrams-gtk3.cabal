@@ -17,7 +17,7 @@ extra-source-files:  CHANGES.markdown, README.markdown
 
 source-repository head
   type:     git
-  location: http://github.com/diagrams/diagrams-gtk.git
+  location: http://github.com/malarkannaninvention/diagrams-gtk3.git
 
 library
   exposed-modules:     Diagrams.Backend.Gtk
