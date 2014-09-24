@@ -2,6 +2,7 @@
 ---------------------
 
 * Require `diagrams-lib-1.2` and `diagrams-cairo-1.2`
+* Added GTK3 Support
 
 1.0.1.1: 2 Junw 2014
 -------------------
